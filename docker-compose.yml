@@ -1,0 +1,26 @@
+version: '2'
+services: 
+  mailhog:
+    restart: always
+    tty: true
+    privileged: true
+    container_name: mailhog
+    image: mailhog/mailhog:v1.0.0
+    command: ["-storage=maildir", "-maildir-path=/maildir"]
+    volumes:
+      - ./volumes/mailhog/volume:/maildir
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+  portainer:
+    image: portainer/portainer-ce
+    container_name: portainer
+    command: -H unix:///var/run/docker.sock
+    restart: always
+    ports:
+      - 9100:9000
+      - 8000:8000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./volumes/portainer/volume:/data
+  
