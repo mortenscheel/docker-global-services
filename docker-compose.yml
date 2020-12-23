@@ -1,14 +1,24 @@
-version: '2'
+version: '3.5'
+
+networks:
+  default:
+    external:
+      name: global-network
+
+volumes:
+  mailhog_data:
+  portainer_data:
+
 services: 
   mailhog:
-    restart: always
+    restart: unless-stopped
     tty: true
     privileged: true
     container_name: mailhog
     image: mailhog/mailhog:v1.0.0
     command: ["-storage=maildir", "-maildir-path=/maildir"]
     volumes:
-      - ./volumes/mailhog/volume:/maildir
+      - mailhog_data:/maildir
     ports:
       - "1025:1025"
       - "8025:8025"
@@ -16,11 +26,11 @@ services:
     image: portainer/portainer-ce
     container_name: portainer
     command: -H unix:///var/run/docker.sock
-    restart: always
+    restart: unless-stopped
     ports:
-      - 9100:9000
-      - 8000:8000
+      - 9999:9000
+      - 8888:8000
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./volumes/portainer/volume:/data
+      - portainer_data:/data
   
