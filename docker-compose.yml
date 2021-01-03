@@ -7,7 +7,11 @@ networks:
 
 volumes:
   mailhog_data:
+    labels:
+      protected: ''
   portainer_data:
+    labels:
+      protected: 
 
 services: 
   mailhog:
@@ -33,4 +37,22 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
+  nginx-proxy:
+    image: jwilder/nginx-proxy:latest
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+
+  default-site:
+    build:
+      context: ./default-site
+      dockerfile: ./Dockerfile
+    expose:
+      - 80
+    restart: always
+    environment:
+      VIRTUAL_HOST: localhost
+    container_name: default-site
   
