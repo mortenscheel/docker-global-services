@@ -41,7 +41,8 @@ services:
       - portainer_data:/data
 
   nginx-proxy:
-    image: jwilder/nginx-proxy:latest
+    build:
+      context: './nginx-proxy'
     container_name: nginx-proxy
     restart: unless-stopped
     ports:
@@ -49,14 +50,14 @@ services:
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock:ro
 
-  default-site:
-    build:
-      context: ./default-site
-      dockerfile: ./Dockerfile
-    expose:
-      - 80
-    restart: unless-stopped
-    environment:
-      VIRTUAL_HOST: localhost
-    container_name: default-site
+  # default-site:
+  #   build:
+  #     context: ./default-site
+  #     dockerfile: ./Dockerfile
+  #   expose:
+  #     - 80
+  #   restart: unless-stopped
+  #   environment:
+  #     VIRTUAL_HOST: localhost
+  #   container_name: default-site
   
