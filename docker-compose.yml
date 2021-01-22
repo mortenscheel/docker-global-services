@@ -6,27 +6,23 @@ networks:
       name: global-network
 
 volumes:
-  mailhog_data:
-    labels:
-      protected: ''
+  # mailhog_data:
   portainer_data:
-    labels:
-      protected: ''
 
 services: 
-  mailhog:
-    build:
-      context: './mailhog'
-    restart: unless-stopped
-    tty: true
-    privileged: true
-    container_name: mailhog
-    command: ["-storage=maildir", "-maildir-path=/home/mailhog/maildir"]
-    volumes:
-      - mailhog_data:/home/mailhog/maildir
-    ports:
-      - "1025:1025"
-      - "8025:8025"
+  # mailhog:
+  #   build:
+  #     context: './mailhog'
+  #   restart: unless-stopped
+  #   tty: true
+  #   privileged: true
+  #   container_name: mailhog
+  #   command: ["-storage=maildir", "-maildir-path=/home/mailhog/maildir"]
+  #   volumes:
+  #     - mailhog_data:/home/mailhog/maildir
+  #   ports:
+  #     - "1025:1025"
+  #     - "8025:8025"
       
   portainer:
     image: portainer/portainer-ce
