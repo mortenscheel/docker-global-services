@@ -1,4 +1,4 @@
-version: '3.5'
+version: "3.5"
 
 networks:
   default:
@@ -7,23 +7,22 @@ networks:
 
 volumes:
   portainer_data:
+    labels:
+      - protected
   apt-cacher-ng:
+    labels:
+      - protected
 
-services: 
-  # traefik:
-  #   image: traefik:v2.3
-  #   command:
-  #     - "--log.level=DEBUG"
-  #     - "--api.insecure=true"
-  #     - "--providers.docker=true"
-  #     - "--providers.docker.exposedbydefault=false"
-  #     - "--entrypoints.web.address=:80"
-  #   restart: always
-  #   ports:
-  #     - "80:80"
-  #     - "8090:8080" # The Web UI (enabled by --api)
-  #   volumes:
-  #     - /var/run/docker.sock:/var/run/docker.sock
+services:
+  nginx-proxy:
+    build:
+      context: "./nginx-proxy"
+    container_name: nginx-proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
 
   mailhog:
     image: mailhog/mailhog:latest
@@ -34,7 +33,7 @@ services:
     ports:
       - "1125:1025"
       - "8125:8025"
-      
+
   portainer:
     image: portainer/portainer-ce
     container_name: portainer
@@ -47,16 +46,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
 
-  nginx-proxy:
-    build:
-      context: './nginx-proxy'
-    container_name: nginx-proxy
-    restart: unless-stopped
-    ports:
-      - "80:80"
-    volumes:
-      - /var/run/docker.sock:/tmp/docker.sock:ro
-
   apt-cacher-ng:
     image: sameersbn/apt-cacher-ng
     container_name: apt-cacher-ng
@@ -65,15 +54,3 @@ services:
     volumes:
       - apt-cacher-ng:/var/cache/apt-cacher-ng
     restart: always
-
-  # default-site:
-  #   build:
-  #     context: ./default-site
-  #     dockerfile: ./Dockerfile
-  #   expose:
-  #     - 80
-  #   restart: unless-stopped
-  #   environment:
-  #     VIRTUAL_HOST: localhost
-  #   container_name: default-site
-  
