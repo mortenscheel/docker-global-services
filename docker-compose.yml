@@ -43,7 +43,7 @@ services:
     image: portainer/portainer-ce
     container_name: portainer
     command: -H unix:///var/run/docker.sock
-    restart: unless-stopped
+    restart: always
     ports:
       - 9999:9000
       - 8888:8000
@@ -55,7 +55,7 @@ services:
     build:
       context: './nginx-proxy'
     container_name: nginx-proxy
-    restart: unless-stopped
+    restart: always
     ports:
       - "80:80"
     volumes:
