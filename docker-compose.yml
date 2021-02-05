@@ -9,9 +9,6 @@ volumes:
   portainer_data:
     labels:
       - protected
-  apt-cacher-ng:
-    labels:
-      - protected
 
 services:
   nginx-proxy:
@@ -45,12 +42,3 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
-
-  apt-cacher-ng:
-    image: sameersbn/apt-cacher-ng
-    container_name: apt-cacher-ng
-    ports:
-      - "3142:3142"
-    volumes:
-      - apt-cacher-ng:/var/cache/apt-cacher-ng
-    restart: always
