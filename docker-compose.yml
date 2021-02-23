@@ -12,14 +12,15 @@ volumes:
 
 services:
   nginx-proxy:
-    build:
-      context: "./nginx-proxy"
+    image: jwilder/nginx-proxy
     container_name: nginx-proxy
     restart: always
     ports:
       - "80:80"
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./nginx-proxy/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx-proxy/vhosts.d:/etc/nginx/vhosts.d:ro
 
   mailhog:
     image: mailhog/mailhog:latest
