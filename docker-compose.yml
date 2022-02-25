@@ -18,10 +18,5 @@ services:
       - './proxy/letsencrypt:/etc/letsencrypt'
     environment:
       DB_SQLITE_FILE: '/data/database.sqlite'
-
-  mailhog:
-    image: cd2team/mailhog:latest
-    restart: unless-stopped
-    tty: true
-    privileged: true
-    container_name: mailhog
+    networks:
+      - proxy
