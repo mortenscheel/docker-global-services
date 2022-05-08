@@ -41,7 +41,7 @@ services:
   #     - NET_ADMIN
   #   restart: unless-stopped
   mailhog:
-    image: mailhog/mailhog
+    image: cd2team/mailhog
     container_name: mailhog
     restart: unless-stopped
     ports:
