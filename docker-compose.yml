@@ -4,22 +4,63 @@ networks:
   proxy:
     external: true
 
+volumes:
+  mysql:
+
 services:
   proxy:
-    image: 'jc21/nginx-proxy-manager:latest'
-    container_name: 'proxy-manager'
+    image: "jc21/nginx-proxy-manager:latest"
+    container_name: "proxy-manager"
     restart: unless-stopped
     ports:
-      - '80:80'
-      - '81:81'
-      - '443:443'
+      - "80:80"
+      - "81:81"
+      - "443:443"
     volumes:
-      - './proxy/data:/data'
-      - './proxy/letsencrypt:/etc/letsencrypt'
+      - "./proxy/data:/data"
+      - "./proxy/letsencrypt:/etc/letsencrypt"
+      - /dev/null:/etc/s6-overlay/s6-rc.d/prepare/50-ipv6.sh
     environment:
-      DB_SQLITE_FILE: '/data/database.sqlite'
+      DB_SQLITE_FILE: "/data/database.sqlite"
+      PUID: 1000
+      PGID: 1000
     networks:
       - proxy
+
+  # mailpit:
+  #   container_name: "mailpit"
+  #   image: "axllent/mailpit:latest"
+  #   environment:
+  #     - MP_SMTP_BIND_ADDR=0.0.0.0:1025
+  #   ports:
+  #     - "1025:1025"
+  #     - "8025:8025"
+  #   networks:
+  #     - proxy
+
+  # mysql:
+  #   image: "mysql/mysql-server:8.0"
+  #   container_name: "mysql"
+  #   ports:
+  #     - "${FORWARD_DB_PORT:-3336}:3306"
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: ""
+  #     MYSQL_ROOT_HOST: "%"
+  #     MYSQL_DATABASE: "global"
+  #     MYSQL_USER: "global"
+  #     MYSQL_PASSWORD: "global"
+  #     MYSQL_ALLOW_EMPTY_PASSWORD: 1
+  #   volumes:
+  #     - "mysql:/var/lib/mysql"
+  #   networks:
+  #     - proxy
+  #   healthcheck:
+  #     test:
+  #       - CMD
+  #       - mysqladmin
+  #       - ping
+  #     retries: 3
+  #     timeout: 5s
   # pihole:
   #   container_name: pihole
   #   image: pihole/pihole:latest
@@ -40,10 +81,10 @@ services:
   #   cap_add:
   #     - NET_ADMIN
   #   restart: unless-stopped
-  mailhog:
-    image: cd2team/mailhog
-    container_name: mailhog
-    restart: unless-stopped
-    ports:
-      - 1025:1025
-      - 8025:8025
+  # mailhog:
+  #   image: cd2team/mailhog
+  #   container_name: mailhog
+  #   restart: unless-stopped
+  #   ports:
+  #     - 1025:1025
+  #     - 8025:8025
