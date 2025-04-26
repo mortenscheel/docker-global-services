@@ -1,90 +1,57 @@
-version: "3"
-
 networks:
   proxy:
     external: true
 
-volumes:
-  mysql:
-
 services:
-  proxy:
-    image: "jc21/nginx-proxy-manager:latest"
-    container_name: "proxy-manager"
-    restart: unless-stopped
+  traefik:
+    image: traefik:latest
+    container_name: traefik
+    restart: on-failure
     ports:
       - "80:80"
-      - "81:81"
       - "443:443"
     volumes:
-      - "./proxy/data:/data"
-      - "./proxy/letsencrypt:/etc/letsencrypt"
-      - /dev/null:/etc/s6-overlay/s6-rc.d/prepare/50-ipv6.sh
-    environment:
-      DB_SQLITE_FILE: "/data/database.sqlite"
-      PUID: 1000
-      PGID: 1000
-    networks:
-      - proxy
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/traefik.yml:/etc/traefik/traefik.yml
+      - ./certs/cert.pem:/etc/traefik/cert.pem
+      - ./certs/key.pem:/etc/traefik/key.pem
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.traefik.rule=Host(`traefik.test`)
+      - traefik.http.routers.traefik.entrypoints=websecure
+      - traefik.http.services.traefik.loadbalancer.server.port=8080
+      - traefik.http.routers.traefik.tls=true
+    healthcheck:
+      test: ["CMD-SHELL", "traefik healthcheck --ping"]
+      interval: 4s
+      timeout: 4s
+      retries: 8
+      start_period: 4s
 
-  # mailpit:
-  #   container_name: "mailpit"
-  #   image: "axllent/mailpit:latest"
-  #   environment:
-  #     - MP_SMTP_BIND_ADDR=0.0.0.0:1025
-  #   ports:
-  #     - "1025:1025"
-  #     - "8025:8025"
-  #   networks:
-  #     - proxy
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: on-failure
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./portainer:/data
+    command: "-H unix:///var/run/docker.sock"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.portainer.rule=Host(`portainer.test`)
+      - traefik.http.routers.portainer.entrypoints=websecure
+      - traefik.http.services.portainer.loadbalancer.server.port=9000
+      - traefik.http.routers.portainer.tls=true
 
-  # mysql:
-  #   image: "mysql/mysql-server:8.0"
-  #   container_name: "mysql"
-  #   ports:
-  #     - "${FORWARD_DB_PORT:-3336}:3306"
-  #   environment:
-  #     MYSQL_ROOT_PASSWORD: ""
-  #     MYSQL_ROOT_HOST: "%"
-  #     MYSQL_DATABASE: "global"
-  #     MYSQL_USER: "global"
-  #     MYSQL_PASSWORD: "global"
-  #     MYSQL_ALLOW_EMPTY_PASSWORD: 1
-  #   volumes:
-  #     - "mysql:/var/lib/mysql"
-  #   networks:
-  #     - proxy
-  #   healthcheck:
-  #     test:
-  #       - CMD
-  #       - mysqladmin
-  #       - ping
-  #     retries: 3
-  #     timeout: 5s
-  # pihole:
-  #   container_name: pihole
-  #   image: pihole/pihole:latest
-  #   ports:
-  #     - "53:53/tcp"
-  #     - "53:53/udp"
-  #     - "67:67/udp"
-  #     - "8010:80/tcp"
-  #   environment:
-  #     TZ: 'Europe/Copenhagen'
-  #     WEBPASSWORD: 'password'
-  #   # Volumes store your data between container upgrades
-  #   volumes:
-  #     - './pihole/:/etc/pihole/'
-  #     - './dnsmasq/:/etc/dnsmasq.d/'
-  #   # Recommended but not required (DHCP needs NET_ADMIN)
-  #   #   https://github.com/pi-hole/docker-pi-hole#note-on-capabilities
-  #   cap_add:
-  #     - NET_ADMIN
-  #   restart: unless-stopped
-  # mailhog:
-  #   image: cd2team/mailhog
-  #   container_name: mailhog
-  #   restart: unless-stopped
-  #   ports:
-  #     - 1025:1025
-  #     - 8025:8025
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: mailpit
+    restart: unless-stopped
+    ports:
+      - 1025:1025
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.mailpit.rule=Host(`mailpit.test`)
+      - traefik.http.routers.mailpit.entrypoints=websecure
+      - traefik.http.services.mailpit.loadbalancer.server.port=8025
+      - traefik.http.routers.mailpit.tls=true
